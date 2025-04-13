@@ -3,10 +3,23 @@ project(GeneticKingdom)
 
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
+# Incluir todos los directorios de headers explícitamente
+include_directories(
+    include
+    src
+    src/core
+    src/map
+    src/towers
+    src/enemies
+    src/ai
+    src/ui
+)
 
-include_directories(include)
-file(GLOB SOURCES "src/*.cpp")
+# Buscar todos los .cpp del proyecto (en cualquier subcarpeta)
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+
+# Buscar SFML y enlazar
+find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
 add_executable(GeneticKingdom ${SOURCES})
 target_link_libraries(GeneticKingdom sfml-graphics sfml-window sfml-system)
