@@ -1,19 +1,15 @@
-#include <SFML/Graphics.hpp>
+#include <iostream>
+// Incluir solo lo que se necesite probar
+#include "map/Map.h"
+#include "towers/Tower.h"
+#include "enemies/Enemy.h"
+#include "core/Game.h"
+#include "ai/GeneticAlgorithm.h"
+#include "ai/Pathfinding.h"
+#include "GUI/menu.h"
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Genetic Kingdom");
-
-    while (window.isOpen()) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-
-        window.clear(sf::Color::Black);
-        // Aquí se pueden dibujar las torres, enemigos, mapa, etc.
-        window.display();
-    }
-
+    Menu menu;
+    menu.mostrar();
     return 0;
 }
