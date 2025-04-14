@@ -1,15 +1,16 @@
 #include <iostream>
-// Incluir solo lo que se necesite probar
 #include "map/Map.h"
 #include "towers/Tower.h"
 #include "enemies/Enemy.h"
-#include "core/Game.h"
+#include "core/GameManager.h"
 #include "ai/GeneticAlgorithm.h"
 #include "ai/Pathfinding.h"
 #include "GUI/menu.h"
 
+
 int main() {
-    Menu menu;
-    menu.mostrar();
+    GameManager game;
+    game.run();
     return 0;
 }
+
