@@ -109,3 +109,35 @@ void Map::draw(sf::RenderWindow& window) {
         }
     }
 }
+
+
+sf::Vector2i Map::getStartTile() const {
+    return startTile;
+}
+
+bool Map::isWalkable(const sf::Vector2i& pos) const {
+    if (pos.x < 0 || pos.y < 0 || pos.x >= COLS || pos.y >= ROWS)
+        return false;
+    return grid[pos.y][pos.x].type == PATH_CHOC;
+}
+
+sf::Vector2i Map::findRightmostPathTile() const {
+    for (int x = COLS - 1; x >= 0; --x) {
+        for (int y = 0; y < ROWS; ++y) {
+            if (grid[y][x].type == PATH_CHOC) {
+                return {x, y};
+            }
+        }
+    }
+    return {0, 0}; // fallback
+}
+sf::Vector2i Map::findLeftmostPathTile() const {
+    for (int x = 0; x < COLS; ++x) {
+        for (int y = 0; y < ROWS; ++y) {
+            if (grid[y][x].type == PATH_CHOC) {
+                return {x, y};
+            }
+        }
+    }
+    return {0, 0}; // fallback
+}

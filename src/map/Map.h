@@ -12,7 +12,7 @@ enum TileType {
 struct Tile {
     TileType type;
     sf::Sprite baseSprite;
-    sf::Sprite overlaySprite; // árbol, si aplica
+    sf::Sprite overlaySprite;
 };
 
 class Map {
@@ -23,14 +23,21 @@ public:
 
     Map();
     void draw(sf::RenderWindow& window);
+    bool isWalkable(const sf::Vector2i& pos) const;
+    sf::Vector2i getStartTile() const;
+    sf::Vector2i findRightmostPathTile() const;
+    sf::Vector2i findLeftmostPathTile() const;
+
 
 private:
     std::vector<std::vector<Tile>> grid;
+    sf::Vector2i startTile;
 
     sf::Texture grassTex;
     sf::Texture dirtChocoTex;
     sf::Texture dirtGrayTex;
-    sf::Texture treeTex[4]; // 4 árboles distintos
+    sf::Texture treeTex[4];
 
-    void generateVisualMap(); // reemplazo de generateRandomPath()
+    void generateVisualMap();
+
 };
