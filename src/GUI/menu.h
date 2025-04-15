@@ -2,5 +2,6 @@
 
 class Menu {
 public:
-    void mostrar();
+    bool mostrar(); // ahora devuelve true si se elige "Jugar"
 };
+

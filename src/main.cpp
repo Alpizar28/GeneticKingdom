@@ -7,10 +7,13 @@
 #include "ai/Pathfinding.h"
 #include "GUI/menu.h"
 
-
 int main() {
-    GameManager game;
-    game.run();
+    Menu menu;
+    if (menu.mostrar()) {
+        GameManager game;
+        game.run();
+    }
     return 0;
 }
+
 
