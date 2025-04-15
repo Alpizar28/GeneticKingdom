@@ -16,7 +16,10 @@ private:
     // Botón Start Wave
     sf::RectangleShape startWaveButton;
     sf::Text startWaveText;
-
+    sf::Texture sidebarTex;
+    sf::Sprite sidebarSprite;
+    sf::RectangleShape sidebarOverlay;
+    
     Map map;
 
     // HUD
@@ -28,6 +31,9 @@ private:
     int totalWaves = 10;
     int remainingEnemies = 5;
 
+    sf::Texture backgroundTex;
+    sf::Sprite backgroundSprite;
+    
     sf::Clock deltaClock;
 
     void handleEvents();

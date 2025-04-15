@@ -1,8 +1,11 @@
 #pragma once
 
 // Dimensiones base del juego
-constexpr int WINDOW_WIDTH = 1280;
-constexpr int WINDOW_HEIGHT = 720;
+constexpr int GAME_WIDTH = 1280;
+constexpr int GAME_HEIGHT = 720;
+
+constexpr int WINDOW_WIDTH = 768;
+constexpr int WINDOW_HEIGHT = 768;
 
 // Rutas de recursos
 constexpr const char* FONT_PATH = "assets/fonts/default.ttf";

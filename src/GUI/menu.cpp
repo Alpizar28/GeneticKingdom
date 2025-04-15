@@ -3,23 +3,33 @@
 #include <iostream>
 #include "Constantes.h"
 
-void Menu::mostrar() {
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Genetic Kingdom - Menu");
+bool Menu::mostrar() {
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Genetic Kingdom - Menú");
     window.setFramerateLimit(TARGET_FPS);
 
-    sf::Font font;
-    if (!font.loadFromFile(FONT_PATH)) {
-        std::cerr << "Error: no se pudo cargar la fuente." << std::endl;
-        return;
+    // Cargar fondo completo con botones incluidos
+    sf::Texture backgroundTex;
+    if (!backgroundTex.loadFromFile("assets/images/menu_full_background.png")) {
+        std::cerr << "❌ Error al cargar fondo completo\n";
+        return false;
     }
 
-    sf::Text title("Genetic Kingdom", font, 60);
-    title.setPosition(WINDOW_WIDTH / 2 - title.getGlobalBounds().width / 2, 150);
-    title.setFillColor(sf::Color::White);
+    sf::Sprite background(backgroundTex);
+    background.setScale(
+        float(WINDOW_WIDTH) / backgroundTex.getSize().x,
+        float(WINDOW_HEIGHT) / backgroundTex.getSize().y
+    );
 
-    sf::Text startText("Presiona ENTER para comenzar", font, 30);
-    startText.setPosition(WINDOW_WIDTH / 2 - startText.getGlobalBounds().width / 2, 350);
-    startText.setFillColor(sf::Color::Green);
+    // Coordenadas aproximadas de los botones visuales
+    const float buttonWidth = 380;
+    const float buttonHeight = 80;
+    const float centerX = WINDOW_WIDTH / 2 - buttonWidth / 2;
+
+    sf::FloatRect jugarBtn(centerX, 450, buttonWidth, buttonHeight);
+    sf::FloatRect opcionesBtn(centerX, 540, buttonWidth, buttonHeight);
+    sf::FloatRect salirBtn(centerX, 630, buttonWidth, buttonHeight);
+
+    bool iniciarJuego = false;
 
     while (window.isOpen()) {
         sf::Event event;
@@ -27,15 +37,24 @@ void Menu::mostrar() {
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Enter) {
-                std::cout << "Iniciando el juego..." << std::endl;
-                window.close();
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                sf::Vector2f mouse(sf::Mouse::getPosition(window));
+
+                if (jugarBtn.contains(mouse)) {
+                    iniciarJuego = true;
+                    window.close();
+                } else if (salirBtn.contains(mouse)) {
+                    window.close();
+                } else if (opcionesBtn.contains(mouse)) {
+                    std::cout << "⚙️ Menú de opciones (a implementar)\n";
+                }
             }
         }
 
-        window.clear(sf::Color(30, 30, 30));
-        window.draw(title);
-        window.draw(startText);
+        window.clear();
+        window.draw(background);
         window.display();
     }
+
+    return iniciarJuego;
 }

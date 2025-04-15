@@ -1,13 +1,13 @@
-// GameManager.cpp (completo, actualizado con Santa y Pathfinding)
 #include "core/GameManager.h"
 #include "ai/Pathfinding.h"
 #include <iostream>
+#include "Constantes.h"
 
 GameManager::GameManager()
-    : window(sf::VideoMode(1280, 720), "Genetic Kingdom") {
+    : window(sf::VideoMode(GAME_WIDTH, GAME_HEIGHT), "Genetic Kingdom") {
     window.setFramerateLimit(60);
 
-    if (!font.loadFromFile("assets/fonts/default.ttf")) {
+    if (!font.loadFromFile(FONT_PATH)) {
         std::cerr << "❌ Error al cargar la fuente." << std::endl;
     }
 
@@ -20,12 +20,26 @@ GameManager::GameManager()
     title.setPosition(centerX, 16);
 
     const float PANEL_WIDTH = 192.f;
-    const float PANEL_X = 1280.f - PANEL_WIDTH;
+    const float PANEL_X = GAME_WIDTH - PANEL_WIDTH;
 
-    rightPanel.setSize(sf::Vector2f(PANEL_WIDTH, 720));
-    rightPanel.setPosition(PANEL_X, 0);
-    rightPanel.setFillColor(sf::Color(30, 30, 30));
+    // 📷 Cargar fondo del sidebar
+    if (!sidebarTex.loadFromFile("assets/images/sidebar_blur.png")) {
+        std::cerr << "❌ Error al cargar fondo del sidebar\n";
+    } else {
+        sidebarSprite.setTexture(sidebarTex);
+        sidebarSprite.setPosition(PANEL_X, 0);
+        sidebarSprite.setScale(
+            PANEL_WIDTH / sidebarTex.getSize().x,
+            GAME_HEIGHT / sidebarTex.getSize().y
+        );
+    }
 
+    // 🟫 Sombra superpuesta para mejorar contraste
+    sidebarOverlay.setSize(sf::Vector2f(PANEL_WIDTH, GAME_HEIGHT));
+    sidebarOverlay.setPosition(PANEL_X, 0);
+    sidebarOverlay.setFillColor(sf::Color(0, 0, 0, 100)); // negro transparente
+
+    // 🪙 Textos
     goldText.setFont(font);
     goldText.setCharacterSize(22);
     goldText.setFillColor(sf::Color::White);
@@ -44,6 +58,7 @@ GameManager::GameManager()
     enemiesText.setString("Enemies: 5");
     enemiesText.setPosition(PANEL_X + 16, 200);
 
+    // ▶️ Botón
     startWaveButton.setSize(sf::Vector2f(PANEL_WIDTH - 32, 48));
     startWaveButton.setPosition(PANEL_X + 16, 600);
     startWaveButton.setFillColor(sf::Color(70, 70, 70));
@@ -56,6 +71,17 @@ GameManager::GameManager()
     float textX = startWaveButton.getPosition().x + (startWaveButton.getSize().x - startWaveText.getLocalBounds().width) / 2;
     float textY = startWaveButton.getPosition().y + (startWaveButton.getSize().y - startWaveText.getLocalBounds().height) / 2 - 5;
     startWaveText.setPosition(textX, textY);
+
+    // 🌄 Fondo del juego
+    if (!backgroundTex.loadFromFile("assets/images/game_background.png")) {
+        std::cerr << "❌ Error al cargar fondo del juego\n";
+    } else {
+        backgroundSprite.setTexture(backgroundTex);
+        backgroundSprite.setScale(
+            float(GAME_WIDTH) / backgroundTex.getSize().x,
+            float(GAME_HEIGHT) / backgroundTex.getSize().y
+        );
+    }
 }
 
 void GameManager::run() {
@@ -71,34 +97,26 @@ void GameManager::handleEvents() {
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed)
             window.close();
+
         if (event.type == sf::Event::MouseButtonPressed) {
             if (event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2f mousePos(event.mouseButton.x, event.mouseButton.y);
+
                 if (startWaveButton.getGlobalBounds().contains(mousePos)) {
                     std::cout << "🟢 Start Wave pressed!\n";
 
                     sf::Vector2i start = map.findLeftmostPathTile();
+                    sf::Vector2i end = map.findRightmostPathTile();
+
                     Pathfinding pf(map);
-                    sf::Vector2i end = map.findRightmostPathTile();  // ✅ NUEVO
-                    
-                    std::cout << "Start: " << start.x << ", " << start.y << "\n";
-                    std::cout << "End:   " << end.x << ", " << end.y << "\n";
-                    
-                    
-                    std::cout << "Start: " << start.x << ", " << start.y << "\n";
-                    std::cout << "End:   " << end.x << ", " << end.y << "\n";
-                    
-                    // Intentar encontrar camino
                     auto path = pf.findPath(start, end);
-                    
+
                     if (path.empty()) {
-                        std::cout << "⚠️ Aún así no se encontró camino...\n";
+                        std::cout << "⚠️ No se encontró camino...\n";
                     } else {
-                        std::cout << "✅ Camino encontrado con " << path.size() << " pasos\n";
+                        std::cout << "✅ Camino con " << path.size() << " pasos\n";
                         santa.setPath(path, Map::TILE_SIZE);
                     }
-                    
-                    
                 }
             }
         }
@@ -111,15 +129,17 @@ void GameManager::update() {
 }
 
 void GameManager::render() {
-    window.clear(sf::Color(20, 20, 20));
-    window.draw(rightPanel);
-    window.draw(title);
+    window.clear();
+    window.draw(backgroundSprite);     
     map.draw(window);
-    santa.draw(window);
+    santa.draw(window);    
+    window.draw(sidebarSprite);        
+    window.draw(sidebarOverlay);       
+    window.draw(title);                
     window.draw(goldText);
     window.draw(waveText);
     window.draw(enemiesText);
     window.draw(startWaveButton);
     window.draw(startWaveText);
     window.display();
-} // Fin de GameManager.cpp
+}
