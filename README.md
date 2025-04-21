@@ -76,10 +76,8 @@ GeneticKingdom/
 
 | Nombre   | Rama Git             | Tarea principal                         |
 |----------|----------------------|------------------------------------------|
-| Pablo    | `juego-pablo`        | Mapa, torres, enemigos, interfaz         |
-| Adrián   | `juego-adrian`       | Interfaz, lógica de juego                |
-| Steven   | `algoritmos-steven`  | A* y algoritmo genético                  |
-
+| Pablo    | `juego-pablo`        | Mapa,enemigos, interfaz,algoritmos       |
+| Adrián   | `juego-adrian`       | Lógica de juego, torres                  |
 ---
 
 ## 🔀 Flujo de trabajo con Git
