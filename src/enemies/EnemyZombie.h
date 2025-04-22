@@ -4,4 +4,6 @@
 class EnemyZombie : public Enemy {
 public:
     EnemyZombie();
+protected:
+    void loadTextures() override;
 };

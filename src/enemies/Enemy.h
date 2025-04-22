@@ -4,23 +4,38 @@
 
 class Enemy {
 public:
-    Enemy(float speed = 80.f, float frameDuration = 0.1f);
+    Enemy(float maxHp, float speed, float frameDuration);
     virtual ~Enemy() = default;
 
-    virtual void setPath(const std::vector<sf::Vector2i>& path, int tileSize);
-    virtual void update(float deltaTime);
+    // Define la ruta a seguir
+    void setPath(const std::vector<sf::Vector2i>& path, int tileSize);
+
+    // Actualiza animación y posición
+    void update(float deltaTime);
+
+    // Dibuja sprite y barra de vida
     virtual void draw(sf::RenderWindow& window);
 
-    bool isFinished() const { return currentTarget >= waypoints.size(); }
+    // Inflige daño
+    void takeDamage(float amount);
+
+    // Consultas
+    bool isFinished() const;
+    float getHp() const;
 
 protected:
-    std::vector<sf::Texture> textures;
-    sf::Sprite sprite;
-    std::vector<sf::Vector2f> waypoints;
-    size_t currentTarget = 0;
+    // Carga las texturas específicas de cada enemigo
+    virtual void loadTextures() = 0;
 
+    std::vector<sf::Texture> textures;
+    sf::Sprite               sprite;
+    std::vector<sf::Vector2f> waypoints;
+    size_t                   currentTarget   = 0;
+
+    float hp;
+    float maxHp;
     float speed;
     float frameDuration;
-    float animationTimer = 0.f;
-    int currentFrame = 0;
+    float animationTimer    = 0.f;
+    int   currentFrame      = 0;
 };
