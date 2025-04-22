@@ -4,4 +4,6 @@
 class EnemyCaballero : public Enemy {
 public:
     EnemyCaballero();
+protected:
+    void loadTextures() override;
 };

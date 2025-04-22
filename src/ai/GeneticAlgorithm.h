@@ -22,6 +22,14 @@ public:
     std::vector<std::unique_ptr<Enemy>> createWave(const std::vector<sf::Vector2i>& path);
     void evaluate(const std::vector<std::unique_ptr<Enemy>>& wave);
     void evolve();
+        int getCurrentGen() const { return currentGen; }
+        float getAverageFitness() const {
+            if (population.empty()) return 0.f;
+            float sum = 0.f;
+            for (auto& ind : population) sum += ind.fitness;
+            return sum / population.size();
+        }
+    
 
 private:
     Individual tournamentSelection();

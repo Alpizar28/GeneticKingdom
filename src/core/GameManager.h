@@ -1,10 +1,12 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
-#include "../map/Map.h"                  // ← ruta relativa correcta
-#include "../ai/GeneticAlgorithm.h"
+#include "InputManager.h"
+#include "WaveManager.h"
+#include "UIManager.h"
+#include "../map/Map.h"
 #include "../enemies/Enemy.h"
-#include "../ai/Pathfinding.h"
+#include "Constantes.h"
 
 class GameManager {
 public:
@@ -12,36 +14,32 @@ public:
     void run();
 
 private:
-    void handleEvents();
-    void update();
-    void render();
+    void resetGame();
+    void handleInput();
+    void updateLogic(float dt);
+    void renderFrame();
 
-    sf::RenderWindow window;
-    sf::Font font;
-    sf::Text title;
+    // SFML essentials
+    sf::RenderWindow                  window;
+    sf::Clock                         deltaClock;
+    sf::Font                          font;
 
-    // Layout/UI
-    sf::Texture sidebarTex;
-    sf::Sprite  sidebarSprite;
-    sf::RectangleShape sidebarOverlay;
-    sf::Texture backgroundTex;
-    sf::Sprite  backgroundSprite;
+    // Sub‐sistemas
+    InputManager                      input;
+    WaveManager                       waves;
+    UIManager                         ui;
 
-    sf::RectangleShape startWaveButton;
-    sf::Text            startWaveText;
-    sf::Text            goldText;
-    sf::Text            waveText;
-    sf::Text            enemiesText;
-
-    Map map;                             // ← aquí el miembro que faltaba
-
-    GeneticAlgorithm ga;
+    // Mundo
+    Map                               map;
     std::vector<std::unique_ptr<Enemy>> enemies;
-    bool waveActive = false;
 
-    int gold        = 100;
-    int wave        = 1;
-    int totalWaves  = 10;
+    // Fondo
+    sf::Texture                       backgroundTex;
+    sf::Sprite                        backgroundSprite;
 
-    sf::Clock deltaClock;
+    // Estado
+    bool                              paused       = false;
+    bool                              debugMode    = false;
+    bool                              showTutorial = true;
+    int                               gold         = 100;
 };
