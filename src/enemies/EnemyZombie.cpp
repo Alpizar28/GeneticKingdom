@@ -1,10 +1,10 @@
-#include "EnemySanta.h"
+#include "EnemyZombie.h"
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
-EnemySanta::EnemySanta()
-  : Enemy(100.f, 80.f, 0.1f)
+EnemyZombie::EnemyZombie()
+  : Enemy(120.f, 60.f, 0.1f)  // por ejemplo HP=120, speed=60
 {
     loadTextures();
     if (!textures.empty()) {
@@ -15,10 +15,10 @@ EnemySanta::EnemySanta()
     }
 }
 
-void EnemySanta::loadTextures() {
+void EnemyZombie::loadTextures() {
     fs::path base = fs::current_path().parent_path();
-    std::string dir = base.string() + "/assets/sprites/enemies/santa/";
-    for (int i = 1; i <= 13; ++i) {
+    std::string dir = base.string() + "/assets/sprites/enemies/zombie/";
+    for (int i = 1; i <= 10; ++i) {
         sf::Texture tex;
         if (tex.loadFromFile(dir + "Walk (" + std::to_string(i) + ").png")) {
             textures.push_back(tex);

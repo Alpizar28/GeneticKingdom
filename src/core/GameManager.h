@@ -1,42 +1,45 @@
 #pragma once
+
 #include <SFML/Graphics.hpp>
-#include "map/Map.h"
-#include "../enemies/EnemySanta.h"
+#include "InputManager.h"
+#include "WaveManager.h"
+#include "UIManager.h"
+#include "../map/Map.h"
+#include "../enemies/Enemy.h"
+#include "Constantes.h"
 
 class GameManager {
 public:
     GameManager();
     void run();
-    EnemySanta santa;
+
 private:
-    sf::RenderWindow window;
-    sf::Font font;
-    sf::Text title;
-    sf::RectangleShape rightPanel;
-    // Botón Start Wave
-    sf::RectangleShape startWaveButton;
-    sf::Text startWaveText;
-    sf::Texture sidebarTex;
-    sf::Sprite sidebarSprite;
-    sf::RectangleShape sidebarOverlay;
-    
-    Map map;
+    void resetGame();
+    void handleInput();
+    void updateLogic(float dt);
+    void renderFrame();
 
-    // HUD
-    sf::Text goldText;
-    sf::Text waveText;
-    sf::Text enemiesText;
-    int gold = 100;
-    int wave = 1;
-    int totalWaves = 10;
-    int remainingEnemies = 5;
+    // SFML essentials
+    sf::RenderWindow                  window;
+    sf::Clock                         deltaClock;
+    sf::Font                          font;
 
-    sf::Texture backgroundTex;
-    sf::Sprite backgroundSprite;
-    
-    sf::Clock deltaClock;
+    // Sub‐sistemas
+    InputManager                      input;
+    WaveManager                       waves;
+    UIManager                         ui;
 
-    void handleEvents();
-    void update();
-    void render();
+    // Mundo
+    Map                               map;
+    std::vector<std::unique_ptr<Enemy>> enemies;
+
+    // Fondo
+    sf::Texture                       backgroundTex;
+    sf::Sprite                        backgroundSprite;
+
+    // Estado
+    bool                              paused       = false;
+    bool                              debugMode    = false;
+    bool                              showTutorial = true;
+    int                               gold         = 100;
 };

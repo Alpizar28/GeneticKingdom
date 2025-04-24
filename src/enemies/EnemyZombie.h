@@ -1,9 +1,9 @@
 #pragma once
 #include "Enemy.h"
 
-class EnemySanta : public Enemy {
+class EnemyZombie : public Enemy {
 public:
-    EnemySanta();
+    EnemyZombie();
 protected:
     void loadTextures() override;
 };
