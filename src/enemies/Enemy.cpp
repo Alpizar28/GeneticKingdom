@@ -71,6 +71,6 @@ bool Enemy::isFinished() const {
     return hp <= 0;
 }
 
-float Enemy::getHp() const {
-    return hp;
-}
+//float Enemy::getHp() const {
+ //   return hp;
+//}
