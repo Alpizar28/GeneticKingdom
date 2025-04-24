@@ -9,8 +9,8 @@ bool Menu::mostrar() {
 
     // Cargar fondo completo con botones incluidos
     sf::Texture backgroundTex;
-    if (!backgroundTex.loadFromFile("assets/images/menu_full_background.png")) {
-        std::cerr << "❌ Error al cargar fondo completo\n";
+// Usa rutas relativas consistentes
+    if (!backgroundTex.loadFromFile("../assets/images/menu_full_background.png")) {        std::cerr << "❌ Error al cargar fondo completo\n";
         return false;
     }
 
