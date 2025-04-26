@@ -141,3 +141,22 @@ sf::Vector2i Map::findLeftmostPathTile() const {
     }
     return {0, 0}; // fallback
 }
+bool Map::isValidTowerPosition(sf::Vector2f position) const {
+    // 1. Convertir coordenadas mundiales a coordenadas de tile
+    int tileX = static_cast<int>((position.x - MAP_OFFSET_X) / TILE_SIZE);
+    int tileY = static_cast<int>((position.y - MAP_OFFSET_Y) / TILE_SIZE);
+
+    // 2. Verificar que esté dentro de los límites del mapa
+    if (tileX < 0 || tileY < 0 || tileX >= COLS || tileY >= ROWS) {
+        return false;
+    }
+
+    // 3. Obtener el tile correspondiente
+    const Tile& tile = grid[tileY][tileX];
+
+    // 4. Reglas de validación:
+    // - No puede estar en un camino (PATH_CHOC/PATH_GRAY)
+    // - No puede estar en un árbol (TREE)
+    // - Debe ser terreno vacío (EMPTY)
+    return tile.type == EMPTY;
+}

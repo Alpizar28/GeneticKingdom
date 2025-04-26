@@ -14,10 +14,13 @@ include_directories(
     src/ai
     src/ui
 )
-
+# Copiar assets al directorio de build
+file(COPY ${CMAKE_SOURCE_DIR}/assets DESTINATION ${CMAKE_BINARY_DIR})
 # Buscar todos los .cpp del proyecto (en cualquier subcarpeta)
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-
+file(GLOB_RECURSE SOURCES 
+    "src/*.cpp" 
+    "src/map/Map.cpp"  # Añade esta línea explícitamente
+)
 # Buscar SFML y enlazar
 find_package(SFML 2.5 COMPONENTS graphics window system REQUIRED)
 
