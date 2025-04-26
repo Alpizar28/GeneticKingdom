@@ -11,5 +11,8 @@ constexpr int WINDOW_HEIGHT = 768;
 constexpr const char* FONT_PATH = "assets/fonts/default.ttf";
 constexpr const char* ICON_PATH = "assets/icon.png";
 
+constexpr int TOWER_COST = 50;
+constexpr float TOWER_RANGE = 150.f;
+constexpr int TOWER_DAMAGE = 10;
 // FPS del juego
 constexpr int TARGET_FPS = 60;

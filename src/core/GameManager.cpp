@@ -49,30 +49,54 @@ void GameManager::run() {
     }
 }
 
+void GameManager::addTowerAtPosition(sf::Vector2f position) {
+    if (gold >= TOWER_COST) {
+        towers.emplace_back(position, TOWER_RANGE, TOWER_DAMAGE);
+        gold -= TOWER_COST;
+    }
+}
+
+void GameManager::updateTowerTargeting() {
+    // Convertimos enemies a vector<Enemy*> para compatibilidad
+    std::vector<Enemy*> enemyPtrs;
+    for (auto& enemy : enemies) {
+        enemyPtrs.push_back(enemy.get());
+    }
+    
+    for (auto& tower : towers) {
+        tower.update(enemyPtrs);
+    }
+}
+
+void GameManager::drawTowers() {
+    for (auto& tower : towers) {
+        tower.draw(window);
+    }
+}
 void GameManager::handleInput() {
     sf::Event e;
     while (window.pollEvent(e)) {
-        // 1) Teclado / cerrar
         InputState st = input.processEvent(e, showTutorial);
-        if (st.requestExit)     window.close();
-        if (st.toggleDebug)     debugMode    = !debugMode;
+        if (st.requestExit) window.close();
+        if (st.toggleDebug) debugMode = !debugMode;
         if (st.advanceTutorial) showTutorial = false;
 
-        // 2) Clicks de ratón (solo fuera de tutorial)
-        if (!showTutorial
-            && e.type == sf::Event::MouseButtonPressed
-            && e.mouseButton.button == sf::Mouse::Left)
-        {
-            sf::Vector2f m(e.mouseButton.x, e.mouseButton.y);
-
-            if (ui.getPauseBtnBounds().contains(m)) {
+        if (!showTutorial && e.type == sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left) {
+            sf::Vector2f mousePos(e.mouseButton.x, e.mouseButton.y);
+            
+            // Primero verificar botones de UI
+            if (ui.getPauseBtnBounds().contains(mousePos)) {
                 paused = !paused;
             }
-            else if (ui.getRestartBtnBounds().contains(m)) {
+            else if (ui.getRestartBtnBounds().contains(mousePos)) {
                 resetGame();
             }
-            else if (ui.getExitBtnBounds().contains(m)) {
+            else if (ui.getExitBtnBounds().contains(mousePos)) {
                 window.close();
+            }
+            // Luego verificar colocación de torres
+            else if (map.isValidTowerPosition(mousePos)) {
+                addTowerAtPosition(mousePos);
             }
         }
     }
@@ -81,6 +105,8 @@ void GameManager::handleInput() {
 
 void GameManager::updateLogic(float dt) {
     if (showTutorial || paused) return;
+
+    updateTowerTargeting();  // Añade esta línea
 
     // 1) Oleadas / GA
     waves.update(dt, map, enemies);
@@ -111,6 +137,7 @@ void GameManager::renderFrame() {
     window.clear();
     window.draw(backgroundSprite);  // fondo
     map.draw(window);               // mapa
+    drawTowers();  // Añade esta línea antes de dibujar enemigos
     for (auto& e : enemies)         // enemigos
         e->draw(window);
 

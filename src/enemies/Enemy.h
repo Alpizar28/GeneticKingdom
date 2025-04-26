@@ -18,6 +18,7 @@ public:
 
     // Inflige daño
     void takeDamage(float amount);
+    const sf::Sprite& getSprite() const { return sprite; }  // Añade esto
 
     // Consultas
     bool isFinished() const;
@@ -31,6 +32,7 @@ protected:
     sf::Sprite               sprite;
     std::vector<sf::Vector2f> waypoints;
     size_t                   currentTarget   = 0;
+    
 
     float hp;
     float maxHp;

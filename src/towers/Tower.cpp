@@ -6,7 +6,7 @@
 // Constructor (igual que antes)
 Tower::Tower(sf::Vector2f position, float range, int damage) 
     : position(position), range(range), damage(damage) {
-    if (!texture.loadFromFile("../../assets/sprites/towers/cannon.png")) {
+    if (!texture.loadFromFile("assets/sprites/towers/cannon.png")) {
         std::cerr << "Error cargando torre: cannon.png\n";
     }
     sprite.setTexture(texture);

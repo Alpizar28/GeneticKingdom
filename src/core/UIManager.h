@@ -25,6 +25,8 @@ public:
     sf::FloatRect getPauseBtnBounds()   const;
     sf::FloatRect getRestartBtnBounds() const;
     sf::FloatRect getExitBtnBounds()    const;
+    bool isMouseOverUI(const sf::Vector2f& mousePos) const;
+
 
 private:
     // Sombra de la barra lateral

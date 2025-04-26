@@ -7,10 +7,12 @@
 #include "../map/Map.h"
 #include "../enemies/Enemy.h"
 #include "Constantes.h"
+#include "../towers/Tower.h"
 
 class GameManager {
 public:
     GameManager();
+
     void run();
 
 private:
@@ -33,6 +35,10 @@ private:
     Map                               map;
     std::vector<std::unique_ptr<Enemy>> enemies;
 
+    std::vector<Tower> towers;  // Contenedor de torres
+    void addTowerAtPosition(sf::Vector2f position);
+    void updateTowerTargeting();
+    void drawTowers();
     // Fondo
     sf::Texture                       backgroundTex;
     sf::Sprite                        backgroundSprite;

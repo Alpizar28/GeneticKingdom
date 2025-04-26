@@ -25,6 +25,7 @@ public:
     void draw(sf::RenderWindow& window);
     bool isWalkable(const sf::Vector2i& pos) const;
     sf::Vector2i getStartTile() const;
+    bool isValidTowerPosition(sf::Vector2f position) const;
     sf::Vector2i findRightmostPathTile() const;
     sf::Vector2i findLeftmostPathTile() const;
 

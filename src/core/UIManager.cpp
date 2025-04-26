@@ -138,7 +138,13 @@ void UIManager::render(sf::RenderWindow& window, const UIState& s) {
         window.draw(debugText);
     }
 }
-
+bool UIManager::isMouseOverUI(const sf::Vector2f& mousePos) const {
+    // Verifica todos los elementos interactivos de la UI
+    return getPauseBtnBounds().contains(mousePos) ||
+           getRestartBtnBounds().contains(mousePos) ||
+           getExitBtnBounds().contains(mousePos) ||
+           sidebarOverlay.getGlobalBounds().contains(mousePos);
+}
 sf::FloatRect UIManager::getPauseBtnBounds()   const { return pauseBtn.box.getGlobalBounds(); }
 sf::FloatRect UIManager::getRestartBtnBounds() const { return restartBtn.box.getGlobalBounds(); }
 sf::FloatRect UIManager::getExitBtnBounds()    const { return exitBtn.box.getGlobalBounds(); }
