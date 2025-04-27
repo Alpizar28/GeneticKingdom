@@ -1,6 +1,9 @@
+// src/enemies/Enemy.h
 #pragma once
+
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <iostream>
 
 class Enemy {
 public:
@@ -16,28 +19,35 @@ public:
     // Dibuja sprite y barra de vida
     virtual void draw(sf::RenderWindow& window);
 
-    // Inflige daño
+    // Inflige daño y loggea
     void takeDamage(float amount);
-    const sf::Sprite& getSprite() const { return sprite; }  // Añade esto
 
-    // Consultas
-    bool isFinished() const;
-    float getHp() const;
+    // Recompensa en oro al morir (10% de la vida máxima por defecto)
+    virtual int getRewardGold() const;
+
+    // Accesores
+    const sf::Sprite& getSprite() const { return sprite; }
+    bool               isFinished() const { return hp <= 0; }
+    float              getHp()       const { return hp; }
+    int                getId()       const { return id; }
 
 protected:
-    // Carga las texturas específicas de cada enemigo
+    // Cada subclase carga sus propias texturas
     virtual void loadTextures() = 0;
 
     std::vector<sf::Texture> textures;
     sf::Sprite               sprite;
     std::vector<sf::Vector2f> waypoints;
-    size_t                   currentTarget   = 0;
-    
+    size_t                   currentTarget = 0;
 
     float hp;
     float maxHp;
     float speed;
     float frameDuration;
-    float animationTimer    = 0.f;
-    int   currentFrame      = 0;
+    float animationTimer = 0.f;
+    int   currentFrame   = 0;
+
+private:
+    int id;
+    static int nextId;
 };
