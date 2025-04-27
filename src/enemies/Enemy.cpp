@@ -1,12 +1,18 @@
+// src/enemies/Enemy.cpp
 #include "Enemy.h"
 #include <cmath>
+
+// Inicialización del contador de IDs
+int Enemy::nextId = 1;
 
 Enemy::Enemy(float maxHp, float speed, float frameDuration)
   : hp(maxHp)
   , maxHp(maxHp)
   , speed(speed)
   , frameDuration(frameDuration)
+  , id(nextId++)
 {
+    std::cout << "[Enemy #" << id << "] Nacido con HP=" << hp << "\n";
 }
 
 void Enemy::setPath(const std::vector<sf::Vector2i>& path, int tileSize) {
@@ -17,8 +23,10 @@ void Enemy::setPath(const std::vector<sf::Vector2i>& path, int tileSize) {
             t.y * tileSize + 80 + tileSize/2.f
         );
     }
-    if (!waypoints.empty())
+    if (!waypoints.empty()) {
         sprite.setPosition(waypoints[0]);
+        currentTarget = 0;
+    }
 }
 
 void Enemy::update(float dt) {
@@ -47,12 +55,15 @@ void Enemy::update(float dt) {
 
 void Enemy::draw(sf::RenderWindow& window) {
     window.draw(sprite);
-    // barra de vida
+
+    // Barra de fondo
     sf::RectangleShape back({40.f, 6.f});
     back.setFillColor({50,50,50,200});
-    back.setPosition(sprite.getPosition().x - 20, sprite.getPosition().y - 30);
+    back.setPosition(sprite.getPosition().x - 20,
+                     sprite.getPosition().y - 30);
     window.draw(back);
 
+    // Barra de vida
     float ratio = hp / maxHp;
     sf::RectangleShape front({40.f * ratio, 6.f});
     front.setFillColor(sf::Color::Green);
@@ -62,15 +73,12 @@ void Enemy::draw(sf::RenderWindow& window) {
 
 void Enemy::takeDamage(float amount) {
     hp -= amount;
-    if (hp <= 0) {
-        hp = 0;
-    }
+    if (hp < 0) hp = 0;
+    std::cout << "[Enemy #" << id << "] takeDamage("
+              << amount << "), HP ahora=" << hp << "\n";
 }
 
-bool Enemy::isFinished() const {
-    return hp <= 0;
-}
-
-float Enemy::getHp() const {
-    return hp;
+int Enemy::getRewardGold() const {
+    // Devuelve el 10% de la vida máxima (puedes personalizar en subclases)
+    return static_cast<int>(maxHp * 0.1f);
 }

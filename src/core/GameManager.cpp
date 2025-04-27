@@ -1,23 +1,30 @@
+// src/core/GameManager.cpp
+
 #include "GameManager.h"
+#include "towers/Projectile.h"
 #include <iostream>
 
 GameManager::GameManager()
-  : window(
-      sf::VideoMode(GAME_WIDTH, GAME_HEIGHT),
-      "Genetic Kingdom",
-      sf::Style::Titlebar | sf::Style::Close  
-    ),
-    input(),
-    waves(20, 5, 0.1f, 10, 30.f),
-    ui(font)
+  : window(sf::VideoMode(GAME_WIDTH, GAME_HEIGHT), "Genetic Kingdom",
+           sf::Style::Titlebar | sf::Style::Close),
+    input(), waves(20, 5, 0.1f, 10, 30.f), ui(font)
 {
     window.setFramerateLimit(TARGET_FPS);
 
-    if (!font.loadFromFile(FONT_PATH)) {
+    if (!font.loadFromFile(FONT_PATH))
         std::cerr << "❌ Error cargando fuente: " << FONT_PATH << "\n";
-    }
 
-    // Carga fondo
+    if (!towerTexture.loadFromFile("assets/sprites/towers/cannon.png"))
+        std::cerr << "❌ Error cargando towerTexture\n";
+    towers.reserve(10);
+
+    if (!projectileTex.loadFromFile("assets/sprites/projectiles/bullet.png"))
+        std::cerr << "❌ No pude cargar bullet.png\n";
+
+    if (!shotBuffer.loadFromFile("assets/sounds/shoot.wav"))
+        std::cerr << "❌ No pude cargar shoot.wav\n";
+    shotSound.setBuffer(shotBuffer);
+
     if (backgroundTex.loadFromFile("assets/images/game_background.png")) {
         backgroundSprite.setTexture(backgroundTex);
         backgroundSprite.setScale(
@@ -34,8 +41,13 @@ void GameManager::resetGame() {
     debugMode    = false;
     showTutorial = true;
     gold         = 100;
-    waves        = WaveManager(20, 5, 0.1f, 10, 30.f);
+
+    // Reemplaza el gestor de olas
+    waves = WaveManager(20, 5, 0.1f, 10, 30.f);
+
     enemies.clear();
+    towers.clear();
+    projectiles.clear();
 }
 
 void GameManager::run() {
@@ -49,42 +61,22 @@ void GameManager::run() {
     }
 }
 
-void GameManager::addTowerAtPosition(sf::Vector2f position) {
-    if (gold >= TOWER_COST) {
-        towers.emplace_back(position, TOWER_RANGE, TOWER_DAMAGE);
-        gold -= TOWER_COST;
-    }
-}
-
-void GameManager::updateTowerTargeting() {
-    // Convertimos enemies a vector<Enemy*> para compatibilidad
-    std::vector<Enemy*> enemyPtrs;
-    for (auto& enemy : enemies) {
-        enemyPtrs.push_back(enemy.get());
-    }
-    
-    for (auto& tower : towers) {
-        tower.update(enemyPtrs);
-    }
-}
-
-void GameManager::drawTowers() {
-    for (auto& tower : towers) {
-        tower.draw(window);
-    }
-}
 void GameManager::handleInput() {
     sf::Event e;
     while (window.pollEvent(e)) {
         InputState st = input.processEvent(e, showTutorial);
-        if (st.requestExit) window.close();
-        if (st.toggleDebug) debugMode = !debugMode;
+        if (st.requestExit)     window.close();
+        if (st.toggleDebug)     debugMode = !debugMode;
         if (st.advanceTutorial) showTutorial = false;
 
-        if (!showTutorial && e.type == sf::Event::MouseButtonPressed && e.mouseButton.button == sf::Mouse::Left) {
+        // Una vez quitado el tutorial, las olas ya arrancan en updateLogic()
+
+        if (!showTutorial
+            && e.type == sf::Event::MouseButtonPressed
+            && e.mouseButton.button == sf::Mouse::Left)
+        {
             sf::Vector2f mousePos(e.mouseButton.x, e.mouseButton.y);
-            
-            // Primero verificar botones de UI
+
             if (ui.getPauseBtnBounds().contains(mousePos)) {
                 paused = !paused;
             }
@@ -94,7 +86,6 @@ void GameManager::handleInput() {
             else if (ui.getExitBtnBounds().contains(mousePos)) {
                 window.close();
             }
-            // Luego verificar colocación de torres
             else if (map.isValidTowerPosition(mousePos)) {
                 addTowerAtPosition(mousePos);
             }
@@ -102,45 +93,92 @@ void GameManager::handleInput() {
     }
 }
 
+void GameManager::addTowerAtPosition(sf::Vector2f position) {
+    if (gold >= TOWER_COST) {
+        towers.emplace_back(towerTexture, position, TOWER_RANGE, TOWER_DAMAGE);
+        gold -= TOWER_COST;
+    }
+}
+
+void GameManager::drawTowers() {
+    for (auto& tower : towers)
+        tower.draw(window);
+}
 
 void GameManager::updateLogic(float dt) {
-    if (showTutorial || paused) return;
 
-    updateTowerTargeting();  // Añade esta línea
+    if (showTutorial || paused)
+        return;
 
-    // 1) Oleadas / GA
     waves.update(dt, map, enemies);
 
-    // 2) Actualizar enemigos vivos
+    // 3) Preparamos punteros a enemigos
+    std::vector<Enemy*> enemyPtrs;
+    for (auto& e : enemies)
+        enemyPtrs.push_back(e.get());
+
+    // 4) Cada torre dispara y crea proyectiles
+    for (auto& tower : towers) {
+        if (Enemy* target = tower.tryFire(enemyPtrs)) {
+            shotSound.play();
+            projectiles.emplace_back(
+                projectileTex,
+                tower.getPosition(),
+                target,
+                400.f,
+                tower.getDamage()
+            );
+        }
+    }
+
+    // 5) Actualizar proyectiles
+    for (auto it = projectiles.begin(); it != projectiles.end();) {
+        it->update(dt);
+        if (!it->isAlive())
+            it = projectiles.erase(it);
+        else
+            ++it;
+    }
+
+    // 6) Actualizar enemigos y sumar oro al morir
     for (auto it = enemies.begin(); it != enemies.end();) {
-        (*it)->update(dt);
-        if ((*it)->isFinished()) it = enemies.erase(it);
-        else ++it;
+        auto& enemy = *it;
+        enemy->update(dt);
+        if (enemy->isFinished()) {
+            gold += enemy->getRewardGold();
+            it = enemies.erase(it);
+        } else {
+            ++it;
+        }
     }
 }
 
 void GameManager::renderFrame() {
-    // Construir estado UI
-    UIState s;
-    s.paused        = paused;
-    s.debugMode     = debugMode;
-    s.showTutorial  = showTutorial;
-    s.gold          = gold;
-    s.currentWave   = waves.getCurrentWave();
-    s.totalWaves    = waves.getTotalWaves();
-    s.enemiesCount  = int(enemies.size());
-    s.timeToNext    = waves.getTimeToNext();
-    s.currentGen    = waves.getCurrentGen();
-    s.avgFitness    = waves.getAverageFitness();
+    UIState s{
+        paused,
+        debugMode,
+        showTutorial,
+        gold,
+        waves.getCurrentWave(),
+        waves.getTotalWaves(),
+        static_cast<int>(enemies.size()),
+        waves.getTimeToNext(),
+        waves.getCurrentGen(),
+        waves.getAverageFitness()
+    };
 
-    // Dibujado
     window.clear();
-    window.draw(backgroundSprite);  // fondo
-    map.draw(window);               // mapa
-    drawTowers();  // Añade esta línea antes de dibujar enemigos
-    for (auto& e : enemies)         // enemigos
+    window.draw(backgroundSprite);
+    map.draw(window);
+
+    drawTowers();
+
+    for (auto& e : enemies)
         e->draw(window);
 
-    ui.render(window, s);           // UI completa (sidebar, HUD, botones, tutorial, debug)
+    for (auto& p : projectiles)
+        p.draw(window);
+
+    ui.render(window, s);
     window.display();
 }
