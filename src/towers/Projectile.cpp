@@ -1,3 +1,5 @@
+// src/towers/Projectile.cpp
+
 #include "Projectile.h"
 #include <cmath>
 
@@ -24,7 +26,7 @@ Projectile::Projectile(const sf::Texture& tex,
     // calculamos el punto de spawn (se añade un offset en punta del cañón)
     sf::Vector2f dir = (target->getSprite().getPosition() - start);
     float len = std::hypot(dir.x, dir.y);
-    sf::Vector2f norm = (len>0 ? dir/len : sf::Vector2f{0,0});
+    sf::Vector2f norm = (len > 0 ? dir/len : sf::Vector2f{0,0});
     float towerTipOffset = tex.getSize().x * s * 0.5f; 
     sprite.setPosition(start + norm * towerTipOffset);
 
@@ -33,7 +35,16 @@ Projectile::Projectile(const sf::Texture& tex,
 }
 
 void Projectile::update(float dt) {
-    if (!alive) return;
+    if (!alive) 
+        return;
+
+    // Si el enemigo ya terminó (murió o escapó), marcamos la bala como muerta
+    if (target->isFinished()) {
+        alive = false;
+        return;
+    }
+
+    // Movimiento
     sprite.move(velocity * dt);
 
     // Centros de proyectil y enemigo
@@ -47,12 +58,12 @@ void Projectile::update(float dt) {
     float rBullet = sprite.getGlobalBounds().width  / 2.f;
     float rEnemy  = target->getSprite().getGlobalBounds().width / 2.f;
 
+    // Colisión
     if (dist <= rBullet + rEnemy) {
         target->takeDamage(damage);
         alive = false;
     }
 }
-
 
 void Projectile::draw(sf::RenderWindow& window) const {
     if (!alive) return;

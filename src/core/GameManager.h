@@ -1,4 +1,3 @@
-// src/core/GameManager.h
 #pragma once
 
 #include <SFML/Graphics.hpp>
@@ -21,45 +20,47 @@ public:
     void run();
 
 private:
-    // Lógica interna
-    void resetGame();
+    // Fases del loop principal
     void handleInput();
     void updateLogic(float dt);
     void renderFrame();
+
+    // Helpers
+    void resetGame();
     void addTowerAtPosition(sf::Vector2f position);
     void drawTowers();
 
     // SFML básicos
-    sf::RenderWindow               window;
-    sf::Clock                      deltaClock;
-    sf::Font                       font;
+    sf::RenderWindow   window;
+    sf::Clock          deltaClock;
+    sf::Font           font;
 
-    // Sonido de disparo
-    sf::SoundBuffer                shotBuffer;
-    sf::Sound                      shotSound;
+    // Audio
+    sf::SoundBuffer    shotBuffer;
+    sf::Sound          shotSound;
 
     // Sub-sistemas
-    InputManager                   input;
-    WaveManager                    waves;
-    UIManager                      ui;
+    InputManager       input;
+    WaveManager        waves;
+    UIManager          ui;
 
-    // Mundo del juego
-    Map                            map;
-    std::vector<std::unique_ptr<Enemy>> enemies;
-    std::vector<Tower>             towers;
+    // Mundo
+    Map                                   map;
+    std::vector<std::unique_ptr<Enemy>>   enemies;
+    std::vector<Tower>                    towers;
 
     // Proyectiles
-    sf::Texture                    towerTexture;
-    sf::Texture                    projectileTex;
-    std::vector<Projectile>        projectiles;
+    sf::Texture                   towerTexture;
+    sf::Texture                   projectileTex;
+    std::vector<Projectile>       projectiles;
 
     // Fondo
-    sf::Texture                    backgroundTex;
-    sf::Sprite                     backgroundSprite;
+    sf::Texture   backgroundTex;
+    sf::Sprite    backgroundSprite;
 
     // Estado de UI / Juego
-    bool                           paused       = false;
-    bool                           debugMode    = false;
-    bool                           showTutorial = true;
-    int                            gold         = 100;
+    bool          paused       = false;
+    bool          debugMode    = false;
+    bool          showTutorial = true;
+    int           gold         = 100;
 };
