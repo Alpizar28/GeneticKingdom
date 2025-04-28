@@ -13,6 +13,7 @@ public:
     void update(float dt);
     void draw(sf::RenderWindow& window) const;
     bool isAlive() const;
+    Enemy* getTarget() const { return target; }
 
 private:
     sf::Sprite    sprite;
