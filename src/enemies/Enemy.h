@@ -30,9 +30,13 @@ public:
     int   getWaypointsReached() const { return waypointIndex; }
 
     const sf::Sprite& getSprite() const { return sprite; }
+    sf::Vector2f getPosition() const { return position; } // or whatever your position member is
+
 
 protected:
     virtual void loadTextures() = 0;
+    sf::Vector2f position;
+
 
     std::vector<sf::Texture> textures;
     sf::Sprite               sprite;
