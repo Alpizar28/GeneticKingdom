@@ -9,40 +9,44 @@
 
 class WaveManager {
 public:
-    WaveManager(int initialWaveSize,
-                int waveIncrement,
+    WaveManager(int   waveSize,
                 float mutationRate,
-                int totalWaves,
+                int   totalWaves,
                 float interval);
 
     void update(float dt,
                 Map& map,
                 std::vector<std::unique_ptr<Enemy>>& enemies);
 
-    Individual* getIndividualForEnemy(Enemy* e) {
-        return ga.getIndividualForEnemy(e);
-    }
+    /* ------ Consultas para GameManager / UI ---------------- */
+    int   getCurrentWave()    const { return currentWave; }
+    int   getTotalWaves()     const { return totalWaves;  }
+    float getTimeToNext()     const { return interval - timer; }
+    int   getCurrentGen()     const { return ga.getCurrentGeneration(); }
+    float getAverageFitness() const { return ga.getAverageFitness(); }
+    float getBestFitness()    const { return ga.getBestFitness(); }
 
-    // Consultas UI
-    int   getCurrentWave()    const;
-    int   getTotalWaves()     const;
-    float getTimeToNext()     const;
-    int   getCurrentGen()     const;
-    float getAverageFitness() const;
-    float getBestFitness()    const;
-    
+    /* Forward: GameManager sigue usando esto ---------------- */
+    Individual* getIndividualForEnemy(Enemy* e)
+        { return ga.getIndividualForEnemy(e); }
 
 private:
-    int                                   initialWaveSize;
-    int                                   waveIncrement;
-    float                                 mutationRate;
-    GeneticAlgorithm                      ga;
-    int                                   currentWave;
-    int                                   totalWaves;
-    bool                                  waveActive;
-    float                                 interval;
-    float                                 timer;
-    std::deque<std::unique_ptr<Enemy>>    pending;
-    float                                 spawnInterval;
-    float                                 spawnTimer;
+    /* parámetros fijos */
+    int   waveSize;
+    float mutationRate;
+
+    GeneticAlgorithm ga;
+
+    /* runtime */
+    int   currentWave;
+    int   totalWaves;
+    bool  waveActive;
+    float interval;
+    float timer;
+
+    /* spawn */
+    float spawnInterval;
+    float spawnTimer;
+
+    std::deque<std::unique_ptr<Enemy>> pending;
 };

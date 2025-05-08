@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vector>
 #include <memory>
 #include <utility>
@@ -14,33 +13,28 @@ struct Individual {
 
 class GeneticAlgorithm {
 public:
-    GeneticAlgorithm(int popSize, int waveSize, float mutationRate);
+    GeneticAlgorithm(int popSize, float mutationRate);
 
-    // Genera la ola y guarda en waveOrder el mapping (Individual*, Enemy*)
     std::vector<std::unique_ptr<Enemy>>
     createWave(const std::vector<sf::Vector2i>& path);
 
-    // Cruce+mutación, usando fitness ya asignado externamente
     void evolve();
+    void resetFitness();
 
-    // Getters para UI / GameManager
+    /* getters ------------------------------------------------ */
     int   getCurrentGeneration() const;
     float getAverageFitness()    const;
     float getBestFitness()       const;
-
-    // Permite al GameManager asignar fitness cuando muere cada enemigo
     Individual* getIndividualForEnemy(Enemy* e);
 
 private:
-    int popSize;
-    int waveSize;
+    int   popSize;       
+    float mutationRate;  
     int currentGen = 1;
-    float mutationRate;
 
     std::vector<Individual> population;
     std::vector<std::pair<Individual*, Enemy*>> waveOrder;
 
     Individual crossover(const Individual& a, const Individual& b);
     void mutate(Individual& ind);
-    // Ya no necesitamos evaluateFitness aquí
 };

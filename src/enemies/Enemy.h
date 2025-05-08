@@ -1,56 +1,74 @@
-// src/enemies/Enemy.h
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <iostream>
+
+/* ---------- Tipos de daño ---------- */
+enum class DamageType { Arrow, Magic, Artillery };
+
+/* ---------- Resistencias ---------- */
+struct Resistances {
+    float arrow     = 1.0f;   // >1 ⇒ resistente, <1 ⇒ débil, 0 ⇒ inmune
+    float magic     = 1.0f;
+    float artillery = 1.0f;
+};
 
 class Enemy {
 public:
-    Enemy(float maxHp, float speed, float frameDuration);
+    Enemy(float maxHp, float speed, float frameDuration,
+          Resistances resists = {});
     virtual ~Enemy() = default;
 
+    /* ---- ciclo de vida ---- */
     void setPath(const std::vector<sf::Vector2i>& path, int tileSize);
-    void update(float deltaTime);
-    virtual void draw(sf::RenderWindow& window);
+    void update(float dt);
+    void draw(sf::RenderWindow& window);
 
-    void takeDamage(float amount);
-    virtual int getRewardGold() const { return static_cast<int>(maxHp * 0.1f); }
+    /* ---- daño ---- */
+    void applyDamage(float amount, DamageType t);
+    void takeDamage(float amount) { applyDamage(amount, DamageType::Arrow); }
 
-    // Setters para GA
-    void setMaxHp(float m)   { maxHp = m; hp = m; }
-    void setSpeed(float s)   { speed = s; }
+    /* ---- setters para GA ---- */
+    void setMaxHp(float newMaxHp);
+    void setSpeed(float newSpeed);
 
-    // Consultas
-    bool isDead()    const { return hp <= 0.f && !escaped; }
-    bool hasEscaped()const { return escaped; }
-    bool isFinished()const { return isDead() || escaped; }
-    float getHp()    const { return hp; }
-    float getMaxHp() const { return maxHp; }
-    int   getId()    const { return id; }
-    int   getWaypointsReached() const { return waypointIndex; }
+    /* ---- getters ---- */
+    bool  isDead()      const { return hp <= 0 && !escaped; }
+    bool  hasEscaped()  const { return escaped; }
+    bool  isFinished()  const { return escaped || isDead(); }
+
+    float getHp()       const { return hp; }
+    float getMaxHp()    const { return maxHp; }
+    int   getRewardGold() const { return static_cast<int>(maxHp * 0.1f); }
+
+    int   getWaypointsReached() const { return waypointsReached; }   // ← NUEVO
 
     const sf::Sprite& getSprite() const { return sprite; }
-    sf::Vector2f getPosition() const { return position; } // or whatever your position member is
-
 
 protected:
     virtual void loadTextures() = 0;
-    sf::Vector2f position;
 
-
+    /* ---- animación ---- */
     std::vector<sf::Texture> textures;
     sf::Sprite               sprite;
-    std::vector<sf::Vector2f> waypoints;
-    int                      waypointIndex = 0;
 
-    float hp, maxHp;
-    float speed;
-    float frameDuration;
-    float animationTimer = 0.f;
-    int   currentFrame   = 0;
+    /* ---- ruta ---- */
+    std::vector<sf::Vector2f> waypoints;
+    int   waypointIndex   = 0;
+    int   waypointsReached= 0;           // ← NUEVO
+
+    /* ---- stats ---- */
+    float hp        = 0.f;
+    float maxHp     = 0.f;
+    float speed     = 0.f;
+    Resistances res;
+
+    /* ---- anim ---- */
+    float frameDuration = 0.f;
+    float animTimer     = 0.f;
+    int   currentFrame  = 0;
 
 private:
-    int id;
     bool escaped = false;
+    int  id;
     static int nextId;
 };

@@ -7,7 +7,7 @@
 GameManager::GameManager()
   : window(sf::VideoMode(GAME_WIDTH, GAME_HEIGHT), "Genetic Kingdom",
            sf::Style::Titlebar | sf::Style::Close),
-    input(), waves(5,1,0.1f,20,20.f), ui()
+    input(), waves(5, 0.1f, 20, 20.f), ui()
 {
     window.setFramerateLimit(TARGET_FPS);
     if (!font.loadFromFile(FONT_PATH))
@@ -39,7 +39,7 @@ void GameManager::resetGame() {
     gold              = 100;
     buildMode         = BuildMode::NONE;
     selectedTowerIndex= -1;
-    waves             = WaveManager(5,1,0.1f,20,20.f);
+    waves = WaveManager(5, 0.1f, 20, 20.f);
     enemies.clear();
     towers.clear();
     projectiles.clear();
