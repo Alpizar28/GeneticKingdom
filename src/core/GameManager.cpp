@@ -224,7 +224,7 @@ void GameManager::renderFrame() {
     };
     ui.render(window, s);
     ui.drawTowerButtons(window);
-    ui.drawUpgradeButton(window, s.nextUpgradeCost, s.upgradeAvailable);
+    ui.drawUpgradeButton(window, s.upgradeLevel, s.nextUpgradeCost, s.upgradeAvailable);
     window.display();
 }
 
