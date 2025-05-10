@@ -19,6 +19,7 @@ struct UIState {
     float avgFitness;
     float bestFitness;
     bool isBuildingTower;
+    int upgradeLevel = 1;
     int  nextUpgradeCost;
     bool upgradeAvailable;
 };
@@ -40,12 +41,14 @@ public:
     sf::FloatRect getExitBtnBounds()    const;
     bool isMouseOverUI(const sf::Vector2f& pos) const;
     sf::FloatRect getUpgradeBtnBounds()       const;
-    void drawUpgradeButton(sf::RenderWindow& w, int cost, bool enabled);
+    void drawUpgradeButton(sf::RenderWindow& w, int level, int cost, bool enabled);
 
 
 private:
     TowerType selectedTowerType = TowerType::None;
-    sf::RectangleShape archerButton, mageButton, artilleryButton;
+    sf::Texture archerTexture, mageTexture, artilleryTexture;
+    sf::Sprite archerSprite, mageSprite, artillerySprite;
+
     sf::RectangleShape sidebarOverlay;
     sf::Text title, goldText, waveText, genText, avgFitText, bestFitText,
              enemiesText, timerText, debugText;

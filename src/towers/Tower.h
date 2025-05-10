@@ -55,7 +55,7 @@ private:
 
     /* tablas de upgrades */
     static constexpr int   upgradeCosts     [MAX_UPGRADES] = {100,200,400};
-    static constexpr float damageMults      [MAX_UPGRADES] = {1.25f,1.25f,1.50f};
+    static constexpr float damageMults      [MAX_UPGRADES] = {1.25f,1.30f,1.50f};
     static constexpr float cooldownMults    [MAX_UPGRADES] = {0.90f,0.90f,0.80f};
-    static constexpr float specialChanceAdd [MAX_UPGRADES] = {0.05f,0.05f,0.10f};
+    static constexpr float specialChanceAdd [MAX_UPGRADES] = {0.05f,0.08f,0.10f};
 };
