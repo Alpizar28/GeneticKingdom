@@ -29,6 +29,10 @@ public:
     int          getDamage()   const { return damage; }
     int          getCost()     const { return cost; }
 
+    // ← Nuevos getters para tooltip
+    float        getRange()    const { return range; }
+    float        getCooldown() const { return cooldown; }
+
     /* tipo de daño de la torre */
     virtual DamageType getDamageType() const = 0;
 

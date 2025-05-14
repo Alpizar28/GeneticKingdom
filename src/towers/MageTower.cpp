@@ -6,7 +6,7 @@ MageTower::MageTower(sf::Vector2f pos, const sf::Texture& tex)
 {
     cooldown       = 2.0f;
     specialChance  = 0.25f;             // 25 % de “explosión mágica”
-    cost           = 200;
+    cost           = 150;
 }
 
 void MageTower::attack(Enemy* target) {

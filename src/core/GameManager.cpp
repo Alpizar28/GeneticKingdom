@@ -36,10 +36,10 @@ void GameManager::resetGame() {
     paused            = false;
     debugMode         = false;
     showTutorial      = true;
-    gold              = 100;
+    gold              = 300;
     buildMode         = BuildMode::NONE;
     selectedTowerIndex= -1;
-    waves = WaveManager(5, 0.1f, 20, 20.f);
+    waves = WaveManager(5, 0.6f, 20, 20.f);
     enemies.clear();
     towers.clear();
     projectiles.clear();
@@ -75,27 +75,44 @@ void GameManager::handleInput() {
             buildPosition = window.mapPixelToCoords(
                 sf::Mouse::getPosition(window));
         }
+
+                if (ev.type == sf::Event::MouseMoved) {
+            sf::Vector2f mp = window.mapPixelToCoords({ev.mouseMove.x, ev.mouseMove.y});
+            hoveredTowerIndex = -1;
+            for (int i = 0; i < (int)towers.size(); ++i) {
+                if (towers[i]->getBounds().contains(mp)) {
+                    hoveredTowerIndex = i;
+                    break;
+                }
+            }
+        }
     }
 }
 
 void GameManager::handleMouseClick(sf::Vector2f mousePos) {
+    // 1) Delegar a UIManager
     ui.handleMouseClick(mousePos);
 
-    // Botones de la UI
-    if (ui.getPauseBtnBounds().contains(mousePos)) {
-        paused = !paused;
-        return;
+    // 2) Procesar acción resultante del dropdown
+    switch (ui.getAction()) {
+        case UIManager::Action::Pause:
+            paused = !paused;
+            break;
+        case UIManager::Action::Restart:
+            resetGame();
+            break;
+        case UIManager::Action::Exit:
+            window.close();
+            break;
+        default:
+            break;
     }
-    if (ui.getRestartBtnBounds().contains(mousePos)) {
-        resetGame();
-        return;
-    }
-    if (ui.getExitBtnBounds().contains(mousePos)) {
-        window.close();
-        return;
-    }
+    ui.clearAction();
+    // Si hubo cualquiera de esas acciones, terminamos aquí
+    if (ui.getAction() != UIManager::Action::None) return;
 
-    // Upgrade de torre seleccionada
+
+    // 3) Upgrade de torre seleccionada
     if (ui.getUpgradeBtnBounds().contains(mousePos) && selectedTowerIndex >= 0) {
         auto& tw = towers[selectedTowerIndex];
         if (tw->upgrade(gold))
@@ -106,7 +123,7 @@ void GameManager::handleMouseClick(sf::Vector2f mousePos) {
         return;
     }
 
-    // Selección de torre a colocar
+    // 4) Selección de torre a colocar
     if (auto sel = ui.getSelectedTower();
         sel != TowerType::None && buildMode == BuildMode::NONE)
     {
@@ -115,7 +132,7 @@ void GameManager::handleMouseClick(sf::Vector2f mousePos) {
         return;
     }
 
-    // Colocación de torre en el mapa
+    // 5) Colocación de torre en el mapa
     if (buildMode != BuildMode::NONE &&
         map.isValidTowerPosition(mousePos))
     {
@@ -125,7 +142,7 @@ void GameManager::handleMouseClick(sf::Vector2f mousePos) {
         return;
     }
 
-    // Selección de torre existente
+    // 6) Selección de torre existente
     for (int i = 0; i < (int)towers.size(); ++i) {
         if (towers[i]->getBounds().contains(mousePos)) {
             selectedTowerIndex = i;
@@ -190,7 +207,11 @@ void GameManager::updateGameLogic(float dt) {
 }
 
 void GameManager::renderFrame() {
+    // 1) Limpia la pantalla
     window.clear();
+
+    // 2) Dibuja el mundo (mapa, fondo, entidades) en la vista de juego
+    //    (si usas una vista “cámara” distinta, resétala antes de esto)
     window.draw(backgroundSprite);
     map.draw(window);
 
@@ -201,12 +222,16 @@ void GameManager::renderFrame() {
         c.setPosition(buildPosition);
         window.draw(c);
     }
+    for (auto& t : towers)       t->draw(window);
+    for (auto& e : enemies)      e->draw(window);
+    for (auto& p : projectiles)  p.draw(window);
 
-    for (auto& t : towers)    t->draw(window);
-    for (auto& e : enemies)   e->draw(window);
-    for (auto& p : projectiles) p.draw(window);
+    // 3) ¡CRUCIAL! Restaurar la vista por defecto para dibujar la UI en
+    //    coordenadas de pantalla (0..ancho, 0..alto)
+    window.setView(window.getDefaultView());
 
-    UIState s{
+    // 4) Construye el estado y dibuja la UI
+    UIState s {
         paused,
         debugMode,
         showTutorial,
@@ -219,14 +244,30 @@ void GameManager::renderFrame() {
         waves.getAverageFitness(),
         waves.getBestFitness(),
         (buildMode != BuildMode::NONE),
+        (selectedTowerIndex >= 0 ? towers[selectedTowerIndex]->getUpgradeLevel() : 0),
         (selectedTowerIndex >= 0 ? towers[selectedTowerIndex]->getNextUpgradeCost() : 0),
-        (selectedTowerIndex >= 0)
+        (selectedTowerIndex >= 0),
+        waves.getFitnessHistory(),
+        waves.getMutationRate()     // ← ¡la añadimos aquí!
     };
+    
+    s.hoveredTower = (hoveredTowerIndex >= 0)
+        ? towers[hoveredTowerIndex].get()
+        : nullptr;
+
     ui.render(window, s);
     ui.drawTowerButtons(window);
-    ui.drawUpgradeButton(window, s.upgradeLevel, s.nextUpgradeCost, s.upgradeAvailable);
+    ui.drawUpgradeButton(
+        window,
+        s.upgradeLevel,
+        s.nextUpgradeCost,
+        s.upgradeAvailable
+    );
+
+    // 5) Finalmente, swap buffers
     window.display();
 }
+
 
 void GameManager::cancelBuilding() {
     buildMode = BuildMode::NONE;
@@ -235,20 +276,24 @@ void GameManager::cancelBuilding() {
 void GameManager::placeTower(sf::Vector2f pos) {
     if (!map.isValidTowerPosition(pos) || buildMode == BuildMode::NONE)
         return;
-    const int cost = 100;
+
+    std::unique_ptr<Tower> newTower =
+        TowerFactory::createTower(
+            static_cast<TowerType>(buildMode),
+            pos,
+            (buildMode == BuildMode::ARCHER    ? archerTexture
+           : buildMode == BuildMode::MAGE      ? mageTexture
+           : /*Artillery*/                       artilleryTexture)
+        );
+    if (!newTower) return;
+
+    // 2) Obtener coste desde la propia torre
+    int cost = newTower->getCost();
     if (gold < cost) return;
-    const sf::Texture* tex = nullptr;
-    switch (buildMode) {
-        case BuildMode::ARCHER:    tex = &archerTexture;    break;
-        case BuildMode::MAGE:      tex = &mageTexture;      break;
-        case BuildMode::ARTILLERY: tex = &artilleryTexture; break;
-        default: return;
-    }
-    if (auto nt = TowerFactory::createTower(
-            static_cast<TowerType>(buildMode), pos, *tex))
-    {
-        towers.push_back(std::move(nt));
-        gold -= cost;
-    }
+
+    // 3) Confirmar compra y añadir torre
+    gold -= cost;
+    towers.push_back(std::move(newTower));
+    ui.setSelectedTowerType(TowerType::None);
     buildMode = BuildMode::NONE;
 }

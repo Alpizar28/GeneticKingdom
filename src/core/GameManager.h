@@ -28,6 +28,7 @@ private:
     void updateGameLogic(float dt);
     void renderFrame();
     void resetGame();
+    int hoveredTowerIndex = -1;
 
     sf::RenderWindow           window;
     sf::Clock                  deltaClock;

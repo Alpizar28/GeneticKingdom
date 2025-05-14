@@ -1,3 +1,4 @@
+// src/ai/GeneticAlgorithm.cpp
 #include "GeneticAlgorithm.h"
 #include "../map/Map.h"
 #include "../enemies/EnemySanta.h"
@@ -7,25 +8,21 @@
 
 static std::mt19937_64 rng{std::random_device{}()};
 
-/* ------------------------------------------------------------------ */
 GeneticAlgorithm::GeneticAlgorithm(int pop, float mRate)
   : popSize(pop), mutationRate(mRate)
 {
     population.resize(popSize);
-
-    std::uniform_real_distribution<float> dHp(80.f,150.f),
-                                          dSpd(40.f,100.f),
-                                          dType(0.f,1.f);
+    std::uniform_real_distribution<float> dHp( 80.f,150.f),
+                                          dSpd( 40.f,100.f),
+                                          dType(  0.f,  1.f);
     for (auto& ind : population)
         ind.genes = { dHp(rng), dSpd(rng), dType(rng) };
 }
 
-/* ------------------------------------------------------------------ */
 void GeneticAlgorithm::resetFitness() {
     for (auto& ind : population) ind.fitness = 0.f;
 }
 
-/* ------------------------------------------------------------------ */
 std::vector<std::unique_ptr<Enemy>>
 GeneticAlgorithm::createWave(const std::vector<sf::Vector2i>& path)
 {
@@ -54,8 +51,15 @@ GeneticAlgorithm::createWave(const std::vector<sf::Vector2i>& path)
     return wave;
 }
 
-/* ------------------------------------------------------------------ */
 void GeneticAlgorithm::evolve() {
+    // 1) Guardar fitness de todos los individuos
+    std::vector<float> currentFitnesses;
+    currentFitnesses.reserve(popSize);
+    for (auto& ind : population)
+        currentFitnesses.push_back(ind.fitness);
+    fitnessHistory.push_back(std::move(currentFitnesses));
+
+    // 2) Selección elitista y cruce+mutación
     std::sort(population.begin(), population.end(),
               [](auto& a, auto& b){ return a.fitness > b.fitness; });
 
@@ -74,7 +78,6 @@ void GeneticAlgorithm::evolve() {
     ++currentGen;
 }
 
-/* ------------------------------------------------------------------ */
 Individual GeneticAlgorithm::crossover(const Individual& a,
                                        const Individual& b)
 {
@@ -86,9 +89,8 @@ Individual GeneticAlgorithm::crossover(const Individual& a,
     return child;
 }
 
-/* ------------------------------------------------------------------ */
 void GeneticAlgorithm::mutate(Individual& ind) {
-    std::uniform_real_distribution<float> dMut(0.f,1.f),
+    std::uniform_real_distribution<float> dMut(  0.f,1.f),
                                           dNoise(-5.f,5.f);
     for (auto& g : ind.genes) {
         if (dMut(rng) < mutationRate) {
@@ -98,7 +100,7 @@ void GeneticAlgorithm::mutate(Individual& ind) {
     }
 }
 
-/* ------------------------------------------------------------------ */
+// -------- Getters --------
 int GeneticAlgorithm::getCurrentGeneration() const { return currentGen; }
 
 float GeneticAlgorithm::getAverageFitness() const {
@@ -111,7 +113,11 @@ float GeneticAlgorithm::getBestFitness() const {
     return population.empty() ? 0.f : population[0].fitness;
 }
 
-/* ------------------------------------------------------------------ */
+const std::vector<std::vector<float>>&
+GeneticAlgorithm::getFitnessHistory() const {
+    return fitnessHistory;
+}
+
 Individual* GeneticAlgorithm::getIndividualForEnemy(Enemy* e) {
     for (auto& pr : waveOrder)
         if (pr.second == e) return pr.first;

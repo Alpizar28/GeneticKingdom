@@ -1,3 +1,4 @@
+// src/core/WaveManager.h
 #pragma once
 
 #include <vector>
@@ -26,27 +27,28 @@ public:
     float getAverageFitness() const { return ga.getAverageFitness(); }
     float getBestFitness()    const { return ga.getBestFitness(); }
 
-    /* Forward: GameManager sigue usando esto ---------------- */
+    // ← Nuevo: exponer historial completo
+    const std::vector<std::vector<float>>&
+        getFitnessHistory() const { return ga.getFitnessHistory(); }
+
     Individual* getIndividualForEnemy(Enemy* e)
         { return ga.getIndividualForEnemy(e); }
+        
+    float getMutationRate() const { return mutationRate; }
 
 private:
-    /* parámetros fijos */
     int   waveSize;
     float mutationRate;
 
     GeneticAlgorithm ga;
 
-    /* runtime */
     int   currentWave;
     int   totalWaves;
     bool  waveActive;
     float interval;
     float timer;
 
-    /* spawn */
     float spawnInterval;
     float spawnTimer;
-
     std::deque<std::unique_ptr<Enemy>> pending;
 };

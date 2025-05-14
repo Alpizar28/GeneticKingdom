@@ -1,10 +1,8 @@
-// UIManager.h
 #pragma once
 #include <SFML/Graphics.hpp>
 #include "../towers/Tower.h"
 #include "Constantes.h"
-#include <array>
-#include <string>
+#include <vector>
 
 struct UIState {
     bool paused;
@@ -19,44 +17,62 @@ struct UIState {
     float avgFitness;
     float bestFitness;
     bool isBuildingTower;
-    int upgradeLevel = 1;
-    int  nextUpgradeCost;
+    int upgradeLevel;
+    int nextUpgradeCost;
     bool upgradeAvailable;
+    std::vector<std::vector<float>> fitnessHistory;
+    float mutationRate;           // para mostrar “Mut: XX%”
+    const Tower* hoveredTower;    // para el tooltip de la torre bajo el cursor
 };
 
 class UIManager {
 public:
+    enum class Action { None, Pause, Restart, Exit };
+
     UIManager();
     void init(sf::Font& font);
     void render(sf::RenderWindow& window, const UIState& state);
-
-    // Gestión de clics y dibujo de botones
     void handleMouseClick(const sf::Vector2f& mousePos);
-    void drawTowerButtons(sf::RenderWindow& window);  // :contentReference[oaicite:2]{index=2}:contentReference[oaicite:3]{index=3}
-    TowerType getSelectedTower()       const;
-    void setSelectedTowerType(TowerType type);
 
-    sf::FloatRect getPauseBtnBounds()   const;
-    sf::FloatRect getRestartBtnBounds() const;
-    sf::FloatRect getExitBtnBounds()    const;
-    bool isMouseOverUI(const sf::Vector2f& pos) const;
-    sf::FloatRect getUpgradeBtnBounds()       const;
+    // Query del menú desplegable
+    Action getAction() const;
+    void   clearAction();
+
+    // Para que GameManager obtenga la torre seleccionada
+    TowerType getSelectedTower() const;
+    void      setSelectedTowerType(TowerType t);
+
+    // Bounds para upgrade
+    sf::FloatRect getUpgradeBtnBounds() const;
     void drawUpgradeButton(sf::RenderWindow& w, int level, int cost, bool enabled);
 
+    // Dibujo de botones de torres
+    void drawTowerButtons(sf::RenderWindow& w);
 
 private:
-    TowerType selectedTowerType = TowerType::None;
-    sf::Texture archerTexture, mageTexture, artilleryTexture;
-    sf::Sprite archerSprite, mageSprite, artillerySprite;
-
+    // --- Widgets UI ---
     sf::RectangleShape sidebarOverlay;
-    sf::Text title, goldText, waveText, genText, avgFitText, bestFitText,
-             enemiesText, timerText, debugText;
-    struct Button { sf::RectangleShape box; sf::Text label; };
-    Button pauseBtn, restartBtn, exitBtn;
+    sf::Text title,
+             goldText, waveText, genText, avgFitText,
+             bestFitText, enemiesText, timerText, debugText,
+             tutorialText;
     sf::RectangleShape tutorialBg;
-    sf::Text tutorialText;
-    bool showingTowerMenu = false;
-    std::array<sf::Sprite,3> towerIcons;
+
+    struct Button {
+        sf::RectangleShape box;
+        sf::Text label;
+    };
+
+    Button configBtn, pauseBtn, restartBtn, exitBtn;
+
+    // Sprites de torres
+    sf::Texture archerTexture, mageTexture, artilleryTexture;
+    sf::Sprite  archerSprite, mageSprite, artillerySprite;
+
     sf::Font* font = nullptr;
+
+    // Estado interno
+    bool     showDropdown    = false;
+    Action   lastAction      = Action::None;
+    TowerType selectedTower = TowerType::None;
 };
