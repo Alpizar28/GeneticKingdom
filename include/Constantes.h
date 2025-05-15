@@ -9,12 +9,11 @@ constexpr int WINDOW_HEIGHT = 768;
 
 // Rutas de recursos
 constexpr const char* FONT_PATH = "assets/fonts/default.ttf";
-// Asegúrate que la ruta es correcta relativa al ejecutable
 constexpr const char* ICON_PATH = "assets/icon.png";
 
 constexpr int TOWER_COST = 50;
 constexpr float TOWER_RANGE = 150.f;
-constexpr int TOWER_DAMAGE = 20;// Añade esto junto a tus otras constantes:
+constexpr int TOWER_DAMAGE = 20;
 
 
 constexpr int ARCHER_COST = 50;
@@ -35,3 +34,5 @@ constexpr float ARTILLERY_COOLDOWN = 2.5f;
 
 // FPS del juego
 constexpr int TARGET_FPS = 60;
+
+static constexpr int DEFAULT_TOTAL_WAVES = 10;

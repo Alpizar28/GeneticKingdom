@@ -1,4 +1,5 @@
 #pragma once
+
 #include <SFML/Graphics.hpp>
 #include "../towers/Tower.h"
 #include "Constantes.h"
@@ -8,71 +9,70 @@ struct UIState {
     bool paused;
     bool debugMode;
     bool showTutorial;
-    int gold;
-    int currentWave;
-    int totalWaves;
-    int enemiesCount;
+    int  gold;
+    int  currentWave;
+    int  totalWaves;
+    int  enemiesCount;
+    int  totalKills;      
     float timeToNext;
-    int currentGen;
+    int   currentGen;
     float avgFitness;
     float bestFitness;
-    bool isBuildingTower;
-    int upgradeLevel;
-    int nextUpgradeCost;
-    bool upgradeAvailable;
-    std::vector<std::vector<float>> fitnessHistory;
-    float mutationRate;           // para mostrar “Mut: XX%”
-    const Tower* hoveredTower;    // para el tooltip de la torre bajo el cursor
+    bool  isBuildingTower;
+    int   upgradeLevel;
+    int   nextUpgradeCost;
+    bool  upgradeAvailable;
+    const std::vector<std::vector<float>>& fitnessHistory;
+    float mutationRate;
+    int dummy;             
+    const Tower* hoveredTower;
 };
+
 
 class UIManager {
 public:
-    enum class Action { None, Pause, Restart, Exit };
+    enum class Action { None, Pause, Restart, Exit, CloseGameOver };
 
     UIManager();
     void init(sf::Font& font);
-    void render(sf::RenderWindow& window, const UIState& state);
-    void handleMouseClick(const sf::Vector2f& mousePos);
+    void render(sf::RenderWindow& w, const UIState& s);
+    void renderGameOver(sf::RenderWindow& w, const UIState& s);
+    void handleMouseClick(const sf::Vector2f& mousePos, bool gameOver);
 
-    // Query del menú desplegable
     Action getAction() const;
     void   clearAction();
 
-    // Para que GameManager obtenga la torre seleccionada
     TowerType getSelectedTower() const;
     void      setSelectedTowerType(TowerType t);
 
-    // Bounds para upgrade
     sf::FloatRect getUpgradeBtnBounds() const;
     void drawUpgradeButton(sf::RenderWindow& w, int level, int cost, bool enabled);
 
-    // Dibujo de botones de torres
-    void drawTowerButtons(sf::RenderWindow& w);
-
 private:
-    // --- Widgets UI ---
+    // Sidebar
     sf::RectangleShape sidebarOverlay;
-    sf::Text title,
-             goldText, waveText, genText, avgFitText,
-             bestFitText, enemiesText, timerText, debugText,
-             tutorialText;
+    sf::Text           title;
+
+    // Stats
+    sf::Text goldText, waveText, genText, enemiesText, totalKillsText,
+             mutText, avgFitText, bestFitText;
+
+    // Buttons
+    struct Button { sf::RectangleShape box; sf::Text label; };
+    Button pauseBtn, restartBtn, exitBtn, fitnessBtn, gameOverBtn;
+
+    // Tutorial
     sf::RectangleShape tutorialBg;
+    sf::Text           tutorialText;
 
-    struct Button {
-        sf::RectangleShape box;
-        sf::Text label;
-    };
-
-    Button configBtn, pauseBtn, restartBtn, exitBtn;
-
-    // Sprites de torres
+    // Tower icons
     sf::Texture archerTexture, mageTexture, artilleryTexture;
-    sf::Sprite  archerSprite, mageSprite, artillerySprite;
+    sf::Sprite  archerSprite,   mageSprite,   artillerySprite;
 
     sf::Font* font = nullptr;
 
-    // Estado interno
-    bool     showDropdown    = false;
-    Action   lastAction      = Action::None;
-    TowerType selectedTower = TowerType::None;
+    // Internal
+    bool      showFitnessDropdown = false;
+    Action    lastAction          = Action::None;
+    TowerType selectedTower       = TowerType::None;
 };

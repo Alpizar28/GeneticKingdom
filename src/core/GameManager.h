@@ -1,9 +1,10 @@
-// src/core/GameManager.h
 #pragma once
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <vector>
 #include <memory>
+
 #include "InputManager.h"
 #include "WaveManager.h"
 #include "UIManager.h"
@@ -28,37 +29,52 @@ private:
     void updateGameLogic(float dt);
     void renderFrame();
     void resetGame();
+
+    // Input handler
+    InputManager input;
+
+    // Vista y temporización
+    sf::RenderWindow window;
+    sf::Clock        deltaClock;
+
+    // Estado de juego
+    bool paused       = false;
+    bool debugMode    = false;
+    bool showTutorial = true;
+
+    // Game-over
+    bool    gameOver    = false;
+    float   gameOverT   = 0.f;
+    static constexpr float GAMEOVER_TIME = 5.f;
+
+    int gold             = 100;
+    int totalKills       = 0;        
+
+    // Mundo y oleadas
+    Map         map;
+    WaveManager waves;
+
+    // Construcción de torres
+    enum class BuildMode buildMode        = BuildMode::NONE;
+    int                  selectedTowerIndex = -1;
+    sf::Vector2f         buildPosition;
+
+    // Entidades
+    std::vector<std::unique_ptr<Enemy>>  enemies;
+    std::vector<std::unique_ptr<Tower>>  towers;
+    std::vector<Projectile>              projectiles;
+
+    // Hover
     int hoveredTowerIndex = -1;
 
-    sf::RenderWindow           window;
-    sf::Clock                  deltaClock;
-    sf::Font                   font;
+    // UI
+    sf::Font    font;
+    UIManager   ui;
 
-    sf::SoundBuffer            shotBuffer;
-    sf::Sound                  shotSound;
-
-    InputManager               input;
-    WaveManager                waves;
-    UIManager                  ui;
-    Map                        map;
-
-    std::vector<std::unique_ptr<Enemy>> enemies;
-    std::vector<std::unique_ptr<Tower>> towers;
-    std::vector<Projectile>             projectiles;
-
-    sf::Texture                archerTexture;
-    sf::Texture                mageTexture;
-    sf::Texture                artilleryTexture;
-    sf::Texture                projectileTex;
-    sf::Texture                backgroundTex;
-    sf::Sprite                 backgroundSprite;
-
-    BuildMode                  buildMode        = BuildMode::NONE;
-    sf::Vector2f               buildPosition;
-    bool                       paused           = false;
-    bool                       debugMode        = false;
-    bool                       showTutorial     = true;
-    int                        gold             = 100;
-
-    int                        selectedTowerIndex = -1;  // índice de torre seleccionada
+    // Recursos gráficos y sonoros
+    sf::Texture archerTexture, mageTexture, artilleryTexture;
+    sf::Texture projectileTex, backgroundTex;
+    sf::Sprite  backgroundSprite;
+    sf::SoundBuffer shotBuffer;
+    sf::Sound       shotSound;
 };
