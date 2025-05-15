@@ -1,4 +1,5 @@
 #include "ArcherTower.h"
+#include <iostream>
 
 ArcherTower::ArcherTower(sf::Vector2f pos, const sf::Texture& tex)
     : Tower(tex, pos, 200.f, 15)        // alto alcance, daño bajo
@@ -9,6 +10,14 @@ ArcherTower::ArcherTower(sf::Vector2f pos, const sf::Texture& tex)
 }
 
 void ArcherTower::attack(Enemy* target) {
-    /* solo daño base; luego puedes añadir “fuego rápido”, etc. */
+
     Tower::attack(target);
+
+    // Ataque especial: "disparo preciso"
+    if (target && (rand() / float(RAND_MAX)) < specialChance) {
+        std::cout << "[ArcherTower] ¡Disparo preciso activado!\n";
+        // Daño verdadero (ignora defensas)
+        target->applyDamage(damage * 0.5f, DamageType::Arrow);
+
+    }
 }
